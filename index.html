@@ -1,796 +1,263 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LoL Companion & In-Game Mastery HUD | v1.7.0</title>
-  <meta name="description" content="Next-generation League of Legends Companion & In-Game Mastery HUD. 100% Riot Vanguard Anti-Cheat Compliant, Champion Ranked League, CS pacing, and living Japanese-inspired themes." />
-  <link rel="icon" type="image/x-icon" href="assets/icons/icon.ico" />
-
-  <!-- Google Fonts: Plus Jakarta Sans, Rajdhani, Cinzel, JetBrains Mono, Shippori Mincho for Japanese aesthetic touch -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rajdhani:wght@600;700;800&family=Shippori+Mincho:wght@600;800&display=swap" rel="stylesheet" />
-
-  <!-- Tailwind CSS CDN with Japanese Color Palette Extension -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            // Traditional Japanese Color Palette (日本の伝統色)
-            sumi: {
-              950: '#07080B', // Pure Sumi ink black (深墨)
-              900: '#0C0E14', // Lacquer Charcoal (黒漆)
-              850: '#11141D', // Deep Iron Slate (鉄黒)
-              800: '#171B26', // Shadowed Indigo Base (藍墨)
-              700: '#1E2433', // Card Surface
-              600: '#2A3245', // Card Elevated
-            },
-            akane: {
-              500: '#E83446', // Sacred Torii Vermilion (朱赤)
-              400: '#FF4E5F', // Brilliant Madder
-              600: '#BF1E30', // Deep Crimson (紅赤)
-              700: '#8C121F', // Dark Lacquer Red (深緋)
-            },
-            yamabuki: {
-              500: '#EBB036', // Imperial Mountain Rose Gold (山吹色)
-              400: '#F7C456', // Radiant Gold (黄金)
-              600: '#C28919', // Antique Gold Leaf (金箔)
-              300: '#FDE49E', // Pale Silk Gold (白金)
-            },
-            asagi: {
-              500: '#25859B', // Japanese Pale Indigo / Water Teal (浅葱色)
-              400: '#3EA8C0', // Cyan-Teal Water (水浅葱)
-              300: '#6ED2E8', // Morning Sky Cyan
-              600: '#1A6779', // Deep Indigo Dye (藍染)
-            },
-            sakura: {
-              400: '#F7A8B8', // Cherry Blossom Petal (桜色)
-              300: '#FFC2CD', // Pale Blossom
-              500: '#E28699', // Blossom Shade
-            },
-            gofun: {
-              50: '#FFFFFF',
-              100: '#F6F7FA', // Moonlit Silk White (胡粉色)
-              200: '#E2E5EC', // Crisp Parchment
-              300: '#C5CBD8', // Soft Silver
-              400: '#8A93A6', // Muted Brush Gray
-            }
-          },
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            display: ['Rajdhani', 'sans-serif'],
-            serif: ['Cinzel', 'serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
-            jp: ['"Shippori Mincho"', 'serif']
-          },
-          boxShadow: {
-            'glow-akane': '0 0 35px rgba(232, 52, 70, 0.35)',
-            'glow-yamabuki': '0 0 35px rgba(235, 176, 54, 0.35)',
-            'glow-asagi': '0 0 35px rgba(37, 133, 155, 0.35)',
-            'shrine-card': '0 20px 50px -15px rgba(0, 0, 0, 0.85), 0 0 30px rgba(232, 52, 70, 0.08)'
-          }
-        }
-      }
-    };
-  </script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bellatrix 3.0.3 — League of Legends Companion</title>
+  <meta name="description" content="Bellatrix 3.0.3: multi-account switching, a fixed auto-updater, a witchy new Command Center, and a lighter, faster app.">
   <style>
+    :root {
+      --bg: #0d0a14;
+      --bg-2: #161022;
+      --card: #1c1529;
+      --line: #2e2342;
+      --text: #e9e3f5;
+      --muted: #a397bd;
+      --violet: #9b6cff;
+      --violet-soft: #c7b0ff;
+      --emerald: #4fd1a5;
+      --gold: #e8c26e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      background-color: #07080B;
-      color: #E2E5EC;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      overflow-x: hidden;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(155,108,255,.22), transparent 70%),
+        radial-gradient(ellipse 50% 40% at 90% 30%, rgba(79,209,165,.08), transparent 70%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
     }
+    a { color: var(--violet-soft); }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
 
-    /* Ambient Ink & Shrine Mist Atmosphere */
-    .ambient-glow {
-      position: fixed;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 0;
-      background: 
-        radial-gradient(circle at 50% 5%, rgba(232, 52, 70, 0.09) 0%, transparent 55%),
-        radial-gradient(circle at 15% 35%, rgba(235, 176, 54, 0.06) 0%, transparent 45%),
-        radial-gradient(circle at 85% 55%, rgba(37, 133, 155, 0.07) 0%, transparent 50%),
-        radial-gradient(circle at 50% 95%, rgba(232, 52, 70, 0.06) 0%, transparent 60%);
+    /* Stars */
+    .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .stars span {
+      position: absolute; width: 2px; height: 2px; border-radius: 50%;
+      background: #fff; opacity: .5; animation: twinkle 4s infinite ease-in-out;
     }
+    @keyframes twinkle { 0%,100% { opacity: .15; } 50% { opacity: .8; } }
+    main, header, footer { position: relative; z-index: 1; }
 
-    .shrine-grid {
-      background-size: 44px 44px;
-      background-image: 
-        linear-gradient(to right, rgba(235, 176, 54, 0.025) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(235, 176, 54, 0.025) 1px, transparent 1px);
-    }
+    /* Nav */
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: .95rem; }
+    .brand svg { width: 26px; height: 26px; }
+    nav .links a { color: var(--muted); text-decoration: none; margin-left: 22px; font-size: .92rem; }
+    nav .links a:hover { color: var(--text); }
 
-    .glass-card {
-      background: rgba(17, 20, 29, 0.82);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.85);
+    /* Hero */
+    .hero { text-align: center; padding: 70px 0 60px; }
+    .badge {
+      display: inline-block; padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px;
+      color: var(--emerald); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; background: rgba(79,209,165,.06);
     }
+    .hero h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.6rem, 7vw, 4.6rem); line-height: 1.05; margin: 22px 0 18px; font-weight: 400;
+    }
+    .hero h1 em {
+      font-style: italic;
+      background: linear-gradient(90deg, var(--violet-soft), var(--violet), var(--emerald));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero p { color: var(--muted); max-width: 580px; margin: 0 auto 34px; font-size: 1.08rem; }
+    .btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: 10px;
+      font-weight: 600; text-decoration: none; transition: transform .15s, box-shadow .15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: linear-gradient(135deg, #7c4dff, var(--violet)); color: #fff; box-shadow: 0 8px 30px rgba(155,108,255,.35); }
+    .btn-ghost { border: 1px solid var(--line); color: var(--text); background: var(--bg-2); }
+    .meta { margin-top: 18px; color: var(--muted); font-size: .85rem; }
 
-    .glass-card-hover {
-      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .glass-card-hover:hover {
-      transform: translateY(-4px);
-      border-color: rgba(232, 52, 70, 0.35);
-      box-shadow: 0 25px 50px -12px rgba(232, 52, 70, 0.22);
-    }
+    /* Sections */
+    section { padding: 56px 0; }
+    h2 { font-family: Georgia, serif; font-weight: 400; font-size: 2rem; margin-bottom: 8px; }
+    .sub { color: var(--muted); margin-bottom: 32px; }
 
-    /* Japanese Neo-Classical Gradients */
-    .gradient-text-akane {
-      background: linear-gradient(135deg, #FF4E5F 0%, #EBB036 55%, #F6F7FA 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; }
+    .card {
+      background: linear-gradient(180deg, var(--card), var(--bg-2));
+      border: 1px solid var(--line); border-radius: 14px; padding: 24px;
+      transition: border-color .2s;
     }
+    .card:hover { border-color: rgba(155,108,255,.55); }
+    .icon {
+      width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center;
+      background: rgba(155,108,255,.12); color: var(--violet-soft); font-size: 1.3rem; margin-bottom: 14px;
+    }
+    .card h3 { font-size: 1.08rem; margin-bottom: 6px; }
+    .card p { color: var(--muted); font-size: .95rem; }
 
-    .gradient-text-gold {
-      background: linear-gradient(135deg, #FDE49E 0%, #EBB036 60%, #C28919 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    /* Changelog */
+    .log { background: var(--bg-2); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .log-group { padding: 22px 26px; border-bottom: 1px solid var(--line); }
+    .log-group:last-child { border-bottom: none; }
+    .tag {
+      display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 6px; margin-bottom: 12px;
     }
+    .t-new { background: rgba(79,209,165,.12); color: var(--emerald); }
+    .t-fix { background: rgba(155,108,255,.14); color: var(--violet-soft); }
+    .t-rem { background: rgba(232,194,110,.12); color: var(--gold); }
+    .log ul { list-style: none; }
+    .log li { padding: 5px 0 5px 22px; position: relative; color: var(--text); font-size: .96rem; }
+    .log li::before { content: "✦"; position: absolute; left: 0; color: var(--violet); font-size: .8rem; top: 8px; }
+
+    /* Install */
+    .steps { counter-reset: s; display: grid; gap: 12px; }
+    .step {
+      counter-increment: s; display: flex; gap: 16px; align-items: flex-start;
+      background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px;
+    }
+    .step::before {
+      content: counter(s); flex: none; width: 30px; height: 30px; border-radius: 50%;
+      display: grid; place-items: center; font-weight: 700; font-size: .9rem;
+      background: rgba(155,108,255,.18); color: var(--violet-soft);
+    }
+    .step p { color: var(--muted); }
+    .step strong { color: var(--text); }
+    .note { margin-top: 16px; color: var(--muted); font-size: .9rem; }
+
+    footer { border-top: 1px solid var(--line); padding: 30px 0 40px; color: var(--muted); font-size: .82rem; text-align: center; }
+    footer p + p { margin-top: 8px; }
+
+    @media (max-width: 600px) { nav .links { display: none; } .hero { padding-top: 40px; } }
   </style>
 </head>
-<body class="selection:bg-akane-500/25 selection:text-akane-400 relative min-h-screen">
-  <!-- Ambient background glow & grid -->
-  <div class="ambient-glow"></div>
-  <div class="fixed inset-0 shrine-grid pointer-events-none opacity-50 z-0"></div>
+<body>
+  <div class="stars" id="stars"></div>
 
-  <!-- NAVIGATION HEADER -->
-  <header class="sticky top-0 z-50 backdrop-blur-xl bg-sumi-950/80 border-b border-white/10 transition-all">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <!-- Brand & Icon -->
-      <a href="#hero" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-xl overflow-hidden border-2 border-yamabuki-500/70 shadow-glow-yamabuki/25 bg-black/80 flex items-center justify-center p-0.5 group-hover:scale-105 transition-transform">
-          <img src="assets/icons/yunara.png" alt="LoL Companion Icon" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://placehold.co/100x100/11141D/E83446?text=LC'" />
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="font-display font-extrabold text-lg text-white tracking-wider uppercase group-hover:text-akane-400 transition-colors">
-              LoL Companion
-            </span>
-            <span class="app-version-text text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-akane-500/15 text-akane-400 border border-akane-500/35">
-              v1.7.0
-            </span>
-          </div>
-          <span class="text-[10px] text-gofun-400 block font-mono">In-Game Mastery & Ranked HUD</span>
-        </div>
-      </a>
-
-      <!-- Clean Navigation Links -->
-      <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gofun-300">
-        <a href="#features" class="hover:text-akane-400 transition-colors">Features</a>
-        <a href="#ranked-league" class="hover:text-yamabuki-400 transition-colors">Ranked League</a>
-        <a href="#themes" class="hover:text-sakura-400 transition-colors">Themed HUDs</a>
-        <a href="#vanguard-safety" class="hover:text-asagi-300 transition-colors flex items-center gap-1.5 font-bold">
-          <span class="w-1.5 h-1.5 rounded-full bg-asagi-400"></span>
-          Vanguard Safe
-        </a>
-        <a href="#download" class="hover:text-akane-400 transition-colors">Download</a>
-      </nav>
-
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-3">
-        <a 
-          href="https://github.com/Baaugh/LeagueApp" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-gofun-200 bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:border-white/20"
-        >
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-          <span>GitHub</span>
-        </a>
-        <a 
-          href="https://github.com/Baaugh/LeagueApp/releases/download/v1.7.0/LoLCompanion-Setup-v1.7.0.exe" 
-          class="app-download-link flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-akane-500 to-akane-600 hover:brightness-110 shadow-glow-akane transition-all active:scale-95"
-        >
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-          <span>Download <span class="app-version-text">v1.7.0</span></span>
-        </a>
+  <header class="wrap">
+    <nav>
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c7b0ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>
+          <path d="M17 3l.6 1.4L19 5l-1.4.6L17 7l-.6-1.4L15 5l1.4-.6z" fill="#c7b0ff"/>
+        </svg>
+        Bellatrix
       </div>
-    </div>
+      <div class="links">
+        <a href="#features">What's new</a>
+        <a href="#changelog">Changelog</a>
+        <a href="#install">Install</a>
+      </div>
+    </nav>
   </header>
 
-  <main class="relative z-10">
-    <!-- HERO SECTION -->
-    <section id="hero" class="pt-16 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-      <!-- Japanese Aesthetic Subtitle Accent -->
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sumi-800/90 border border-yamabuki-500/30 text-yamabuki-400 text-xs font-mono font-semibold mb-6 shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-akane-500 animate-pulse"></span>
-        <span class="font-jp text-[11px] tracking-wider text-yamabuki-300">真の競技体験</span>
-        <span class="text-white/30">•</span>
-        <span>100% Riot Vanguard Anti-Cheat Compliant • Out-of-Process Overlay</span>
+  <main>
+    <section class="hero wrap">
+      <span class="badge">✦ Version 3.0.3 is here</span>
+      <h1>A new spell for<br><em>your League client</em></h1>
+      <p>Bellatrix 3.0.3 brings one-click account switching, an updater that actually updates, a reworked Command Center, and a lighter app all round.</p>
+      <div class="btns">
+        <!-- Replace YOUR-USERNAME/Bellatrix with your repo path -->
+        <a class="btn btn-primary" href="https://github.com/YOUR-USERNAME/Bellatrix/releases/latest">⬇ Download 3.0.3</a>
+        <a class="btn btn-ghost" href="#changelog">Read the changelog</a>
       </div>
+      <div class="meta">Windows · Free · Already installed? Bellatrix will offer the update on launch.</div>
+    </section>
 
-      <!-- Main Headline -->
-      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold tracking-tight text-white mb-6 max-w-5xl mx-auto leading-none">
-        Master Your Champions with <br class="hidden sm:inline" />
-        <span class="gradient-text-akane">Ranked League & Tactical In-Game HUD</span>
-      </h1>
-
-      <p class="text-base sm:text-lg text-gofun-300 max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
-        An ultra-lightweight desktop companion crafted for League of Legends players. Features an independent 173-champion ranked ladder (Iron IV to Challenger), calibrated CS pacing, living Japanese-inspired HUD themes, and pure match outcome progression.
-      </p>
-
-      <!-- Primary Action Buttons -->
-      <div class="flex flex-wrap items-center justify-center gap-4 mb-16">
-        <a 
-          href="https://github.com/Baaugh/LeagueApp/releases/download/v1.7.0/LoLCompanion-Setup-v1.7.0.exe" 
-          class="app-download-link flex items-center gap-3 px-8 py-4 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-akane-500 via-akane-600 to-yamabuki-600 hover:shadow-glow-akane transition-all hover:scale-105 active:scale-95 shadow-xl border border-white/10"
-        >
-          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-          <div class="text-left">
-            <span class="block leading-tight font-extrabold text-white">Download for Windows (<span class="app-version-text">v1.7.0</span>)</span>
-            <span class="block text-[11px] text-yamabuki-300 font-mono font-normal">Standalone Installer • ~86 MB • Win 10/11</span>
-          </div>
-        </a>
-
-        <a 
-          href="https://github.com/Baaugh/LeagueApp/releases" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          class="flex items-center gap-2.5 px-6 py-4 rounded-2xl text-sm font-bold text-gofun-200 bg-sumi-800/90 hover:bg-sumi-700 border border-white/10 hover:border-yamabuki-500/40 transition-all shadow-sm"
-        >
-          <svg class="w-5 h-5 text-yamabuki-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-          <span>All Releases</span>
-        </a>
-
-        <a 
-          href="https://github.com/Baaugh/LeagueApp" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          class="flex items-center gap-2 px-6 py-4 rounded-2xl text-sm font-bold text-gofun-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:border-white/20"
-        >
-          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-          <span>View Source</span>
-        </a>
-      </div>
-
-      <!-- Quick Technical Specs Strip -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
-        <div class="glass-card p-4 rounded-2xl border-white/10">
-          <div class="text-xs text-gofun-400 font-mono">FRAMEWORK</div>
-          <div class="text-sm font-bold text-white mt-1">Electron + Vite + React</div>
-          <div class="text-[11px] text-akane-400 mt-0.5 font-mono">Strict User Space</div>
+    <section id="features" class="wrap">
+      <h2>What's new in 3.0.3</h2>
+      <p class="sub">The biggest Bellatrix update yet.</p>
+      <div class="grid">
+        <div class="card">
+          <div class="icon">⇄</div>
+          <h3>Multi-account switcher</h3>
+          <p>Save your accounts once and switch between them in one click. Bellatrix closes League, signs you out of the Riot Client, logs into the account you picked, and offers to launch League. No restart needed.</p>
         </div>
-        <div class="glass-card p-4 rounded-2xl border-white/10">
-          <div class="text-xs text-gofun-400 font-mono">CPU AT IDLE</div>
-          <div class="text-sm font-bold text-emerald-400 mt-1">0.0% CPU Drag</div>
-          <div class="text-[11px] text-gofun-400 mt-0.5 font-mono">Zero Game Impact</div>
+        <div class="card">
+          <div class="icon">🔒</div>
+          <h3>Stays on your PC</h3>
+          <p>Saved logins and sessions are stored only on your own computer. Nothing is uploaded or sent anywhere.</p>
         </div>
-        <div class="glass-card p-4 rounded-2xl border-white/10">
-          <div class="text-xs text-gofun-400 font-mono">OVERLAY TECH</div>
-          <div class="text-sm font-bold text-yamabuki-400 mt-1">WS_EX_TRANSPARENT</div>
-          <div class="text-[11px] text-gofun-400 mt-0.5 font-mono">0ms Input Latency</div>
+        <div class="card">
+          <div class="icon">✦</div>
+          <h3>Working auto-updater</h3>
+          <p>No more stray terminal window that does nothing. Bellatrix now downloads the new version from GitHub, installs it, and reopens itself.</p>
         </div>
-        <div class="glass-card p-4 rounded-2xl border-white/10">
-          <div class="text-xs text-gofun-400 font-mono">ANTI-CHEAT STATUS</div>
-          <div class="text-sm font-bold text-emerald-400 mt-1">100% Vanguard Safe</div>
-          <div class="text-[11px] text-gofun-400 mt-0.5 font-mono">Out-of-Process Only</div>
+        <div class="card">
+          <div class="icon">☾</div>
+          <h3>Redesigned Command Center</h3>
+          <p>The dashboard has a new witchy look: darker, cleaner, and easier to read at a glance.</p>
+        </div>
+        <div class="card">
+          <div class="icon">⚡</div>
+          <h3>Lighter launches</h3>
+          <p>Opening League through Bellatrix now uses fewer resources, so your PC isn't fighting itself before champ select.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🛡</div>
+          <h3>Security hardening</h3>
+          <p>A full security pass across the app, tightening how Bellatrix handles your data and talks to the client.</p>
         </div>
       </div>
     </section>
 
-    <!-- SECTION: CHAMPION RANKED LEAGUE HIGHLIGHT -->
-    <section id="ranked-league" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div class="glass-card rounded-3xl p-8 sm:p-12 border border-yamabuki-500/30 relative overflow-hidden shadow-2xl bg-gradient-to-b from-sumi-850 to-sumi-950">
-        <!-- Japanese Crest Watermark Accent -->
-        <div class="absolute -top-16 -right-16 w-64 h-64 bg-yamabuki-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-akane-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div class="flex flex-col lg:flex-row items-center justify-between gap-10">
-          <div class="max-w-2xl">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="px-3 py-1 rounded-full bg-yamabuki-500/20 text-yamabuki-400 border border-yamabuki-500/40 text-xs font-mono font-bold tracking-wider uppercase">
-                Featured System
-              </span>
-              <span class="text-xs text-gofun-400 font-mono">Competitive Progression</span>
-            </div>
-
-            <h2 class="text-3xl sm:text-4xl font-display font-extrabold text-white tracking-wide mb-4">
-              Champion Ranked League: 173 Individual Ladders
-            </h2>
-
-            <p class="text-sm sm:text-base text-gofun-300 leading-relaxed mb-6 font-normal">
-              Every champion you play now has their own dedicated rank from <strong>Iron IV to Challenger</strong>. Win matches to gain League Points (LP) and earn promotion; losses deduct LP with demotion protection. Unplayed champions remain cleanly hidden until you take them onto the Rift.
-            </p>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
-              <div class="p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-center gap-3">
-                <span class="w-8 h-8 rounded-lg bg-yamabuki-500/20 text-yamabuki-400 flex items-center justify-center font-bold text-sm">👑</span>
-                <div>
-                  <strong class="text-white block font-sans">Strict Queue Isolation</strong>
-                  <span class="text-gofun-400">Ranked Solo & Normal Draft isolated</span>
-                </div>
-              </div>
-
-              <div class="p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-center gap-3">
-                <span class="w-8 h-8 rounded-lg bg-akane-500/20 text-akane-400 flex items-center justify-center font-bold text-sm">🛡️</span>
-                <div>
-                  <strong class="text-white block font-sans">Practice Tool Exclusion</strong>
-                  <span class="text-gofun-400">Training room never alters your LP</span>
-                </div>
-              </div>
-
-              <div class="p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-center gap-3">
-                <span class="w-8 h-8 rounded-lg bg-asagi-500/20 text-asagi-400 flex items-center justify-center font-bold text-sm">⚡</span>
-                <div>
-                  <strong class="text-white block font-sans">Match Reclassification</strong>
-                  <span class="text-gofun-400">Automatic LCU sync correction</span>
-                </div>
-              </div>
-
-              <div class="p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-center gap-3">
-                <span class="w-8 h-8 rounded-lg bg-sakura-500/20 text-sakura-400 flex items-center justify-center font-bold text-sm">🏆</span>
-                <div>
-                  <strong class="text-white block font-sans">Adaptive Apex Podium</strong>
-                  <span class="text-gofun-400">Dynamic showcase of your top 3</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Visual Showcase Badge -->
-          <div class="w-full lg:w-80 shrink-0 p-6 rounded-2xl bg-black/60 border border-yamabuki-500/40 shadow-xl text-center">
-            <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-yamabuki-600 via-yamabuki-500 to-akane-500 flex items-center justify-center text-3xl shadow-glow-yamabuki">
-              🏆
-            </div>
-            <h3 class="text-lg font-bold text-white font-display">Climb on Every Pick</h3>
-            <p class="text-xs text-gofun-400 mt-1 mb-4 leading-normal">
-              Earn +28 LP in Iron down to +12 LP in Challenger. Demotion shield protects fresh promotions.
-            </p>
-            <a 
-              href="#download" 
-              class="block w-full py-2.5 rounded-xl bg-yamabuki-500/20 hover:bg-yamabuki-500/30 text-yamabuki-300 border border-yamabuki-500/40 font-bold text-xs transition-colors"
-            >
-              Get Companion v1.7.0 ➔
-            </a>
-          </div>
+    <section id="changelog" class="wrap">
+      <h2>Changelog</h2>
+      <p class="sub">Version 3.0.3</p>
+      <div class="log">
+        <div class="log-group">
+          <span class="tag t-new">New</span>
+          <ul>
+            <li>Account switcher with saved credentials or captured sessions</li>
+            <li>"Capture Session" button for accounts that use Riot's "Stay signed in"</li>
+            <li>Option to launch League right after switching accounts</li>
+            <li>Redesigned Command Center UI</li>
+          </ul>
+        </div>
+        <div class="log-group">
+          <span class="tag t-fix">Fixed</span>
+          <ul>
+            <li>Auto-updater found new versions but never installed them</li>
+            <li>App didn't reopen after an update</li>
+            <li>Wrong account showed as "Active" after switching</li>
+            <li>High resource use when launching League from Bellatrix</li>
+            <li>Various smaller bug fixes</li>
+          </ul>
+        </div>
+        <div class="log-group">
+          <span class="tag t-rem">Removed</span>
+          <ul>
+            <li>VOD recorder. It wasn't producing recordings reliably, so it's been taken out completely.</li>
+          </ul>
         </div>
       </div>
     </section>
 
-    <!-- CORE FEATURES SECTION -->
-    <section id="features" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-wide mb-3">
-          Tactical Edge Without Screen Bloat
-        </h2>
-        <p class="text-sm sm:text-base text-gofun-400 max-w-2xl mx-auto">
-          Built strictly for performance and competitive clarity. No invasive ads, no CPU lag, and no unapproved gameplay automations.
-        </p>
+    <section id="install" class="wrap">
+      <h2>Install or update</h2>
+      <p class="sub">Takes about a minute.</p>
+      <div class="steps">
+        <div class="step"><p><strong>Download</strong> the latest release from the GitHub Releases page.</p></div>
+        <div class="step"><p><strong>Run the installer.</strong> If you already have Bellatrix, it installs over your current version.</p></div>
+        <div class="step"><p><strong>Open Bellatrix</strong> and add your accounts in the Accounts tab to start switching.</p></div>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Feature 1: Role & Rank CS Pacing -->
-        <div class="glass-card glass-card-hover p-6 rounded-3xl flex flex-col justify-between border-white/10">
-          <div>
-            <div class="w-12 h-12 rounded-2xl bg-asagi-500/20 text-asagi-400 border border-asagi-500/30 flex items-center justify-center mb-4 text-xl shadow-glow-asagi/30">
-              ⏱️
-            </div>
-            <h3 class="text-lg font-bold text-white mb-2 font-display">Role & Rank CS Pacing</h3>
-            <p class="text-xs text-gofun-300 leading-relaxed font-normal">
-              Real-time creep score pacing calibrated specifically to your lane (Top, Jungle, Mid, ADC, Support) and tier (Iron through Challenger). Know immediately if you are on carry pace.
-            </p>
-          </div>
-          <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-asagi-400 font-mono font-bold">
-            <span>Calibrated Benchmarks</span>
-            <span>✓ Active</span>
-          </div>
-        </div>
-
-        <!-- Feature 2: Match History & Telemetry -->
-        <div class="glass-card glass-card-hover p-6 rounded-3xl flex flex-col justify-between border-white/10">
-          <div>
-            <div class="w-12 h-12 rounded-2xl bg-akane-500/20 text-akane-400 border border-akane-500/30 flex items-center justify-center mb-4 text-xl shadow-glow-akane/30">
-              📊
-            </div>
-            <h3 class="text-lg font-bold text-white mb-2 font-display">Match History Queue Filters</h3>
-            <p class="text-xs text-gofun-300 leading-relaxed font-normal">
-              High-visibility badges clearly separate Ranked Solo/Duo, Normal Draft, and ARAM games. Instant filter tabs recalculate win rates, KDA, and CS/min pacing dynamically per queue.
-            </p>
-          </div>
-          <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-akane-400 font-mono font-bold">
-            <span>Dynamic Telemetry</span>
-            <span>⭐ v1.7.0</span>
-          </div>
-        </div>
-
-        <!-- Feature 3: Dynamic Resource & Fury Bars -->
-        <div class="glass-card glass-card-hover p-6 rounded-3xl flex flex-col justify-between border-white/10">
-          <div>
-            <div class="w-12 h-12 rounded-2xl bg-yamabuki-500/20 text-yamabuki-400 border border-yamabuki-500/30 flex items-center justify-center mb-4 text-xl shadow-glow-yamabuki/30">
-              🔥
-            </div>
-            <h3 class="text-lg font-bold text-white mb-2 font-display">Custom Resource & Fury Meters</h3>
-            <p class="text-xs text-gofun-300 leading-relaxed font-normal">
-              Tailored HUD telemetry for every champion. Real-time draining and filling Fury/Rage bars for Shyvana, Renekton, and Gnar, with automatic hiding of mana bars for manaless champions.
-            </p>
-          </div>
-          <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-yamabuki-400 font-mono font-bold">
-            <span>Champion-Aware HUD</span>
-            <span>✓ Active</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION: THEMED IN-GAME HUDS -->
-    <section id="themes" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-wide mb-3">
-          Unique Themed HUDs & Minimap Skins
-        </h2>
-        <p class="text-sm sm:text-base text-gofun-400 max-w-2xl mx-auto">
-          Personalize both your desktop app and in-game combat HUD with authentic character aesthetics.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Ahri Card -->
-        <div class="glass-card p-6 rounded-3xl border-sakura-400/30 bg-gradient-to-b from-sakura-500/10 to-sumi-950">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-xl bg-sakura-500/20 border border-sakura-400/40 flex items-center justify-center text-lg">
-              🌸
-            </div>
-            <div>
-              <h3 class="font-bold text-white text-base font-display">Spirit Blossom Ahri</h3>
-              <span class="text-[11px] text-sakura-300 font-mono">Celestial Petals & Spirit Crests</span>
-            </div>
-          </div>
-          <p class="text-xs text-gofun-300 leading-relaxed">
-            Delicate blossom aura, soft pink crystal telemetry bars, and Spirit Blossom shrine ornamentation designed for fluid laning.
-          </p>
-        </div>
-
-        <!-- Yunara Card -->
-        <div class="glass-card p-6 rounded-3xl border-akane-500/30 bg-gradient-to-b from-akane-500/10 to-sumi-950">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-xl bg-akane-500/20 border border-akane-500/40 flex items-center justify-center text-lg">
-              ⛩️
-            </div>
-            <div>
-              <h3 class="font-bold text-white text-base font-display">Crimson Shrine Yunara</h3>
-              <span class="text-[11px] text-akane-400 font-mono">Torii Frames & Foxfire Embers</span>
-            </div>
-          </div>
-          <p class="text-xs text-gofun-300 leading-relaxed">
-            Sacred torii minimap borders, foxfire glow meters, and fiery ember combat telemetry tailored for assertive skirmishing.
-          </p>
-        </div>
-
-        <!-- Poro Card -->
-        <div class="glass-card p-6 rounded-3xl border-asagi-400/30 bg-gradient-to-b from-asagi-500/10 to-sumi-950">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-xl bg-asagi-500/20 border border-asagi-400/40 flex items-center justify-center text-lg">
-              ❄️
-            </div>
-            <div>
-              <h3 class="font-bold text-white text-base font-display">Freljord Frost Poro</h3>
-              <span class="text-[11px] text-asagi-300 font-mono">Frost-Bitten Ice & Subzero Cyan</span>
-            </div>
-          </div>
-          <p class="text-xs text-gofun-300 leading-relaxed">
-            Glacial crystalline frames, subzero cyan HUD pacing, and poro snack counters crafted for calm, deliberate teamfighting.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION: 100% VANGUARD COMPLIANCE & SAFETY -->
-    <section id="vanguard-safety" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div class="glass-card rounded-3xl p-8 sm:p-10 border border-emerald-500/30 bg-gradient-to-b from-emerald-950/20 to-sumi-950">
-        <div class="flex items-center gap-2.5 mb-3">
-          <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-mono font-bold tracking-wider uppercase">
-            Riot Games Developer & Vanguard Policy Verification
-          </span>
-          <span class="text-xs text-gofun-400 font-mono">100% Out-of-Process</span>
-        </div>
-
-        <h2 class="text-2xl sm:text-4xl font-display font-extrabold text-white tracking-wide mb-4">
-          Safe by Architecture: 100% Out-of-Process
-        </h2>
-
-        <p class="text-sm sm:text-base text-gofun-300 leading-relaxed mb-6 font-normal">
-          LoL Companion operates strictly in compliance with Riot Games Third-Party Developer Policies. The application runs completely outside the game process, reading only official local endpoints without ever modifying or hooking game memory.
-        </p>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div class="p-4 rounded-2xl bg-black/40 border border-emerald-500/30">
-            <div class="text-emerald-400 font-bold text-sm mb-1">✓ Zero Memory Editing</div>
-            <p class="text-xs text-gofun-400">
-              No <code class="text-emerald-300">ReadProcessMemory</code> or <code class="text-emerald-300">WriteProcessMemory</code>. Zero memory hooks.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-black/40 border border-emerald-500/30">
-            <div class="text-emerald-400 font-bold text-sm mb-1">✓ Zero DLL Injection</div>
-            <p class="text-xs text-gofun-400">
-              No DirectX hooking or process injection. Standard transparent Windows OS overlay (<code class="text-emerald-300">WS_EX_TRANSPARENT</code>).
-            </p>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-black/40 border border-emerald-500/30">
-            <div class="text-emerald-400 font-bold text-sm mb-1">✓ Fog of War Protected</div>
-            <p class="text-xs text-gofun-400">
-              Only reads official, sanctioned local APIs: local LCU port and Live Client Data (<code class="text-emerald-300">127.0.0.1:2999</code>).
-            </p>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-black/40 border border-emerald-500/30">
-            <div class="text-emerald-400 font-bold text-sm mb-1">✓ Zero Automation</div>
-            <p class="text-xs text-gofun-400">
-              Strictly visual telemetry. Zero macro clicking, zero ward timers in fog, zero spell queueing.
-            </p>
-          </div>
-        </div>
-
-        <div class="p-4 rounded-2xl bg-black/50 border border-white/10 text-xs text-gofun-400 leading-relaxed italic">
-          <strong>Mandatory Legal Notice:</strong> LoL Companion isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION: DOWNLOAD & DISTRIBUTION HUB -->
-    <section id="download" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-wide mb-3">
-          Download the Latest Release
-        </h2>
-        <p class="text-sm sm:text-base text-gofun-400 max-w-xl mx-auto">
-          Fast, direct downloads from official GitHub Releases. Free, open source, and lightweight.
-        </p>
-      </div>
-
-      <div class="glass-card rounded-3xl overflow-hidden border border-white/10 max-w-4xl mx-auto shadow-2xl">
-        <div class="divide-y divide-white/10 text-sm">
-          <!-- Primary Setup Installer -->
-          <div class="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/5">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="app-filename-text font-bold text-white text-base">LoLCompanion-Setup-v1.7.0.exe</span>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                  LATEST RELEASE
-                </span>
-              </div>
-              <p class="text-xs text-gofun-400 mt-1">
-                Official Windows 64-bit standalone installer (~86 MB). Safe user-space installation without administrator rights.
-              </p>
-            </div>
-            <a 
-              href="https://github.com/Baaugh/LeagueApp/releases/download/v1.7.0/LoLCompanion-Setup-v1.7.0.exe" 
-              class="app-download-link px-6 py-3 rounded-xl bg-gradient-to-r from-akane-500 to-akane-600 text-white font-bold text-xs flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 shadow-glow-akane transition-all shrink-0"
-            >
-              <span>Download Installer (.exe)</span>
-              <span>⬇</span>
-            </a>
-          </div>
-
-          <!-- GitHub Releases Direct Link -->
-          <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-white text-sm">GitHub Releases Repository</span>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-gofun-300 font-bold">
-                  PORTAL
-                </span>
-              </div>
-              <p class="text-xs text-gofun-400 mt-0.5">
-                View commit history, checksums, and alternate assets on the official GitHub release page.
-              </p>
-            </div>
-            <a 
-              href="https://github.com/Baaugh/LeagueApp/releases/latest" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shrink-0"
-            >
-              <span>View on GitHub</span>
-              <span>↗</span>
-            </a>
-          </div>
-
-          <!-- Remote Update Manifest -->
-          <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-white text-sm">version.json</span>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-asagi-500/15 text-asagi-300 font-bold">
-                  UPDATE MANIFEST
-                </span>
-              </div>
-              <p class="text-xs text-gofun-400 mt-0.5">
-                Machine-readable version manifest powering client in-app update checks and auto-downloads.
-              </p>
-            </div>
-            <a 
-              href="version.json" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-gofun-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shrink-0"
-            >
-              <span>View Manifest</span>
-              <span>↗</span>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick 3-Step Install Guide -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-10 text-left">
-        <div class="glass-card p-5 rounded-2xl border-white/5">
-          <span class="text-xs font-mono font-bold text-akane-400 block mb-1">STEP 1</span>
-          <h4 class="text-sm font-bold text-white">Download Setup Wizard</h4>
-          <p class="text-xs text-gofun-400 mt-1">
-            Click the download button above to grab the lightweight setup package (~86 MB).
-          </p>
-        </div>
-
-        <div class="glass-card p-5 rounded-2xl border-white/5">
-          <span class="text-xs font-mono font-bold text-yamabuki-400 block mb-1">STEP 2</span>
-          <h4 class="text-sm font-bold text-white">Install Cleanly</h4>
-          <p class="text-xs text-gofun-400 mt-1">
-            Runs without administrator rights, cleanly isolated in standard user space.
-          </p>
-        </div>
-
-        <div class="glass-card p-5 rounded-2xl border-white/5">
-          <span class="text-xs font-mono font-bold text-asagi-400 block mb-1">STEP 3</span>
-          <h4 class="text-sm font-bold text-white">Launch & Climb</h4>
-          <p class="text-xs text-gofun-400 mt-1">
-            Starts with League of Legends. HUD overlay and Ranked League sync automatically.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ARTIST CREDITS & RECOGNITION -->
-    <section class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div class="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 bg-gradient-to-r from-sakura-500/10 via-sumi-950 to-yamabuki-500/10">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div class="max-w-2xl">
-            <span class="text-xs font-mono font-bold text-sakura-400 uppercase tracking-wider block mb-1">
-              Community Artwork Attribution
-            </span>
-            <h3 class="text-xl font-bold font-display text-white">
-              Recognizing the Artists Behind the Portraits
-            </h3>
-            <p class="text-xs text-gofun-300 mt-1 leading-relaxed">
-              We extend our gratitude to the original community illustrators whose character artwork enriches LoL Companion:
-            </p>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-4">
-            <!-- Yunara Card -->
-            <div class="flex items-center gap-3 p-3 px-4 rounded-2xl bg-black/60 border border-yamabuki-500/30">
-              <div class="w-10 h-10 rounded-xl overflow-hidden border border-yamabuki-500/60 shrink-0">
-                <img src="assets/icons/yunara.png" alt="Yunara" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/11141D/EBB036?text=Yunara'" />
-              </div>
-              <div>
-                <span class="text-xs font-bold text-white block">Yunara Portrait</span>
-                <span class="text-[11px] text-yamabuki-400 font-mono">Illustrated by <strong>Sol</strong></span>
-              </div>
-            </div>
-
-            <!-- Shyvana Card -->
-            <div class="flex items-center gap-3 p-3 px-4 rounded-2xl bg-black/60 border border-akane-500/30">
-              <div class="w-10 h-10 rounded-xl overflow-hidden border border-akane-500/60 shrink-0">
-                <img src="assets/icons/shyvana.png" alt="Shyvana" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/11141D/E83446?text=Shyvana'" />
-              </div>
-              <div>
-                <span class="text-xs font-bold text-white block">Shyvana Portrait</span>
-                <span class="text-[11px] text-akane-400 font-mono">Illustrated by <strong>Nizumi</strong></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <p class="note">Found a bug? Open an issue on the <a href="https://github.com/YOUR-USERNAME/Bellatrix/issues">GitHub Issues page</a>.</p>
     </section>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="border-t border-white/10 bg-sumi-950/95 py-12 px-4 sm:px-6 lg:px-8 relative z-10">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-gofun-400">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg overflow-hidden border border-yamabuki-500/40">
-          <img src="assets/icons/yunara.png" alt="LoL Companion Icon" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/11141D/E83446?text=LC'" />
-        </div>
-        <div>
-          <span class="font-bold text-white block text-sm font-display tracking-wider">LoL Companion <span class="app-version-text">v1.7.0</span></span>
-          <span class="text-gofun-400">Open Source League of Legends Companion & In-Game Mastery HUD</span>
-        </div>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-6">
-        <a href="https://github.com/Baaugh/LeagueApp" target="_blank" rel="noopener noreferrer" class="hover:text-akane-400 transition-colors">GitHub Repository</a>
-        <a href="https://github.com/Baaugh/LeagueApp/releases" target="_blank" rel="noopener noreferrer" class="hover:text-yamabuki-400 transition-colors">Releases</a>
-        <a href="https://github.com/Baaugh/LeagueApp/issues" target="_blank" rel="noopener noreferrer" class="hover:text-akane-400 transition-colors">Issue Tracker</a>
-        <a href="#vanguard-safety" class="text-emerald-400 hover:text-emerald-300 transition-colors">Vanguard Certified</a>
-      </div>
-    </div>
-
-    <div class="max-w-7xl mx-auto mt-8 pt-6 border-t border-white/5 text-[11px] text-gofun-400 leading-relaxed text-center md:text-left">
-      LoL Companion isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.
-    </div>
+  <footer class="wrap">
+    <p>Bellatrix © 2026 · Made by Korsu</p>
+    <p>Bellatrix isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.</p>
   </footer>
 
-  <!-- DYNAMIC RELEASE ENGINE: Keeps website and download links automatically in sync with the newest release -->
   <script>
-    function compareSemver(v1, v2) {
-      const p1 = (v1 || '').replace(/^v/, '').split('.').map(n => parseInt(n, 10) || 0);
-      const p2 = (v2 || '').replace(/^v/, '').split('.').map(n => parseInt(n, 10) || 0);
-      for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
-        const num1 = p1[i] || 0;
-        const num2 = p2[i] || 0;
-        if (num1 > num2) return 1;
-        if (num1 < num2) return -1;
-      }
-      return 0;
-    }
-
-    async function syncLatestRelease() {
-      let latestVersion = '1.7.0';
-      let downloadUrl = `https://github.com/Baaugh/LeagueApp/releases/download/v${latestVersion}/LoLCompanion-Setup-v${latestVersion}.exe`;
-
-      // 1. Fetch local version.json first (immediate, same origin)
-      try {
-        const res = await fetch(`version.json?t=${Date.now()}`, { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.version && compareSemver(data.version, latestVersion) >= 0) {
-            latestVersion = data.version;
-            if (data.downloadUrl) downloadUrl = data.downloadUrl;
-          }
-        }
-      } catch (e) {}
-
-      // 2. Query GitHub Releases API to guarantee site displays newly cut releases
-      try {
-        const ghRes = await fetch('https://api.github.com/repos/Baaugh/LeagueApp/releases/latest', {
-          headers: { 'Accept': 'application/vnd.github.v3+json' }
-        });
-        if (ghRes.ok) {
-          const ghData = await ghRes.json();
-          const tag = (ghData.tag_name || '').replace(/^v/, '');
-          if (tag && compareSemver(tag, latestVersion) >= 0) {
-            latestVersion = tag;
-            const exeAsset = (ghData.assets || []).find(a => a.name && a.name.endsWith('.exe') && !a.name.includes('blockmap'));
-            if (exeAsset && exeAsset.browser_download_url) {
-              downloadUrl = exeAsset.browser_download_url;
-            } else {
-              downloadUrl = `https://github.com/Baaugh/LeagueApp/releases/download/v${tag}/LoLCompanion-Setup-v${tag}.exe`;
-            }
-          }
-        }
-      } catch (e) {}
-
-      // 3. Dynamically update all DOM elements
-      document.querySelectorAll('.app-version-text').forEach(el => {
-        el.textContent = `v${latestVersion}`;
-      });
-      document.querySelectorAll('.app-download-link').forEach(el => {
-        el.setAttribute('href', downloadUrl);
-      });
-      document.querySelectorAll('.app-filename-text').forEach(el => {
-        el.textContent = `LoLCompanion-Setup-v${latestVersion}.exe`;
-      });
-      document.title = `LoL Companion & In-Game Mastery HUD | v${latestVersion}`;
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', syncLatestRelease);
-    } else {
-      syncLatestRelease();
+    const s = document.getElementById('stars');
+    for (let i = 0; i < 70; i++) {
+      const d = document.createElement('span');
+      d.style.left = Math.random() * 100 + '%';
+      d.style.top = Math.random() * 100 + '%';
+      d.style.animationDelay = (Math.random() * 4) + 's';
+      if (Math.random() > .8) { d.style.width = d.style.height = '3px'; }
+      s.appendChild(d);
     }
   </script>
 </body>
